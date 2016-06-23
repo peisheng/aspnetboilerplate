@@ -35,16 +35,20 @@
 
   "tools": {
     "Microsoft.AspNetCore.Razor.Tools": {
-      "version": "1.0.0-preview2-final"
+      "version": "1.0.0-preview2-final",
+      "imports": "portable-net45+win8+wp8+wpa81"
     },
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": {
-      "version": "1.0.0-preview2-final"
+      "version": "1.0.0-preview2-final",
+      "imports": "portable-net45+win8+wp8+wpa81"
     },
     "Microsoft.EntityFrameworkCore.Tools": {
-      "version": "1.0.0-preview2-final"
+      "version": "1.0.0-preview2-final",
+      "imports": "portable-net45+win8+wp8+wpa81"
     },
     "Microsoft.VisualStudio.Web.CodeGeneration.Tools": {
-      "version": "1.0.0-preview2-final"
+      "version": "1.0.0-preview2-final",
+      "imports": "portable-net45+win8+wp8+wpa81"
     }
   },
 
