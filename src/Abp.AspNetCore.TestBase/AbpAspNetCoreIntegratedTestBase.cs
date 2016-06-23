@@ -15,28 +15,40 @@ namespace Abp.AspNetCore.TestBase
     public abstract class AbpAspNetCoreIntegratedTestBase<TStartup> 
         where TStartup : class
     {
-        protected TestServer Server { get; }
+        protected TestServer Server { get; private set; }
 
-        protected HttpClient Client { get; }
+        protected HttpClient Client { get; private set; }
 
-        protected IServiceProvider ServiceProvider { get; }
+        protected IServiceProvider ServiceProvider { get; private set; }
 
-        protected IIocManager IocManager { get; }
+        protected IIocManager IocManager { get; private set; }
 
-        protected TestAbpSession AbpSession { get; }
+        protected TestAbpSession AbpSession { get; private set; }
 
         protected AbpAspNetCoreIntegratedTestBase()
         {
-            var builder = new WebHostBuilder()
-                .UseStartup<TStartup>();
+            var builder = CreateWebHostBuilder();
+            Server = CreateTestServer(builder);
+            Client = Server.CreateClient();
+            SetPropertyDependencies();
+        }
 
-            Server = new TestServer(builder);
-
+        private void SetPropertyDependencies()
+        {
             ServiceProvider = Server.Host.Services;
             IocManager = ServiceProvider.GetRequiredService<IIocManager>();
             AbpSession = ServiceProvider.GetRequiredService<TestAbpSession>();
+        }
 
-            Client = Server.CreateClient();
+        protected virtual IWebHostBuilder CreateWebHostBuilder()
+        {
+            return new WebHostBuilder()
+                .UseStartup<TStartup>();
+        }
+
+        protected virtual TestServer CreateTestServer(IWebHostBuilder builder)
+        {
+            return new TestServer(builder);
         }
 
         protected virtual string GetUrl<TController>()

@@ -1,4 +1,5 @@
-﻿using Abp.AspNetCore.Mvc.Auditing;
+﻿using System.Buffers;
+using Abp.AspNetCore.Mvc.Auditing;
 using Abp.AspNetCore.Mvc.Authorization;
 using Abp.AspNetCore.Mvc.ExceptionHandling;
 using Abp.AspNetCore.Mvc.Results;
@@ -24,7 +25,7 @@ namespace Abp.AspNetCore.Mvc
                 new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
-                }));
+                }, ArrayPool<char>.Create()));
         }
     }
 }
