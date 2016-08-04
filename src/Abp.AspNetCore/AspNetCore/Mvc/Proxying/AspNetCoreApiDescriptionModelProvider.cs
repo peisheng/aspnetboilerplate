@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using Abp.AspNetCore.Configuration;
 using Abp.AspNetCore.Mvc.Extensions;
@@ -56,9 +55,11 @@ namespace Abp.AspNetCore.Mvc.Proxying
                 return;
             }
 
+            var returnValue = new ReturnValueApiDescriptionModel(method.ReturnType);
 
             var actionModel = controllerModel.AddAction(new ActionApiDescriptionModel(
                 method.Name,
+                returnValue,
                 apiDescription.RelativePath,
                 apiDescription.HttpMethod
             ));

@@ -2,42 +2,34 @@
 using Abp.AspNetCore;
 using Abp.AspNetCore.Configuration;
 using Abp.EntityFrameworkCore;
-using Abp.Localization;
-using Abp.Localization.Dictionaries;
-using Abp.Localization.Dictionaries.Json;
+using Abp.EntityFrameworkCore.Configuration;
 using Abp.Modules;
 using AbpAspNetCoreDemo.Core;
+using AbpAspNetCoreDemo.Db;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace AbpAspNetCoreDemo
 {
     [DependsOn(
         typeof(AbpAspNetCoreModule), 
-        typeof(AbpAspNetCoreDemoCoreModule), 
+        typeof(AbpAspNetCoreDemoCoreModule),
         typeof(AbpEntityFrameworkCoreModule)
         )]
     public class AbpAspNetCoreDemoModule : AbpModule
     {
         public override void PreInitialize()
         {
-            Configuration.Auditing.IsEnabledForAnonymousUsers = true;
+            Configuration.DefaultNameOrConnectionString = IocManager.Resolve<IConfigurationRoot>().GetConnectionString("Default");
 
-            Configuration.Localization.Languages.Add(new LanguageInfo("en", "English", isDefault: true));
-            Configuration.Localization.Languages.Add(new LanguageInfo("tr", "Türkçe"));
-
-            Configuration.Localization.Sources.Add(
-                new DictionaryBasedLocalizationSource("AbpAspNetCoreDemoModule",
-                    new JsonEmbeddedFileLocalizationDictionaryProvider(
-                        Assembly.GetExecutingAssembly(),
-                        "AbpAspNetCoreDemo.Localization.SourceFiles"
-                    )
-                )
-            );
+            Configuration.Modules.AbpEfCore().AddDbContext<MyDbContext>(options =>
+            {
+                options.DbContextOptions.UseSqlServer(options.ConnectionString);
+            });
 
             Configuration.Modules.AbpAspNetCore()
                 .CreateControllersForAppServices(
-                    typeof(AbpAspNetCoreDemoCoreModule).Assembly,
-                    useConventionalHttpVerbs: true,
-                    moduleName: "appcore"
+                    typeof(AbpAspNetCoreDemoCoreModule).Assembly
                 );
         }
 

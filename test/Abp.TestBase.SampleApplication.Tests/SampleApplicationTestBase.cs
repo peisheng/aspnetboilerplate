@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
-using Abp.Collections;
-using Abp.Modules;
 using Abp.TestBase.SampleApplication.ContacLists;
 using Abp.TestBase.SampleApplication.Crm;
 using Abp.TestBase.SampleApplication.EntityFramework;
@@ -13,18 +11,23 @@ using EntityFramework.DynamicFilters;
 
 namespace Abp.TestBase.SampleApplication.Tests
 {
-    public abstract class SampleApplicationTestBase : AbpIntegratedTestBase
+    public abstract class SampleApplicationTestBase : AbpIntegratedTestBase<SampleApplicationTestModule>
     {
         protected SampleApplicationTestBase()
         {
+            CreateInitialData();
+        }
+
+        protected override void PreInitialize()
+        {
+            base.PreInitialize();
+
             //Fake DbConnection using Effort!
             LocalIocManager.IocContainer.Register(
                 Component.For<DbConnection>()
                     .UsingFactoryMethod(Effort.DbConnectionFactory.CreateTransient)
                     .LifestyleSingleton()
                 );
-
-            CreateInitialData();
         }
 
         private void CreateInitialData()
@@ -172,13 +175,7 @@ namespace Abp.TestBase.SampleApplication.Tests
                       }
             });
         }
-
-        protected override void AddModules(ITypeList<AbpModule> modules)
-        {
-            base.AddModules(modules);
-            modules.Add<SampleApplicationTestModule>();
-        }
-
+        
         public void UsingDbContext(Action<SampleApplicationDbContext> action)
         {
             using (var context = LocalIocManager.Resolve<SampleApplicationDbContext>())

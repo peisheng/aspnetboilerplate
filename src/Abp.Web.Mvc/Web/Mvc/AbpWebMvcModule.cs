@@ -2,8 +2,13 @@
 using System.Reflection;
 using System.Web.Mvc;
 using Abp.Modules;
+using Abp.Web.Mvc.Auditing;
+using Abp.Web.Mvc.Authorization;
+using Abp.Web.Mvc.Configuration;
 using Abp.Web.Mvc.Controllers;
 using Abp.Web.Mvc.ModelBinding.Binders;
+using Abp.Web.Mvc.Uow;
+using Abp.Web.Mvc.Validation;
 
 namespace Abp.Web.Mvc
 {
@@ -16,6 +21,8 @@ namespace Abp.Web.Mvc
         /// <inheritdoc/>
         public override void PreInitialize()
         {
+            IocManager.Register<IAbpMvcConfiguration, AbpMvcConfiguration>();
+
             IocManager.AddConventionalRegistrar(new ControllerConventionalRegistrar());
         }
 
@@ -30,6 +37,11 @@ namespace Abp.Web.Mvc
         /// <inheritdoc/>
         public override void PostInitialize()
         {
+            GlobalFilters.Filters.Add(IocManager.Resolve<AbpMvcAuthorizeFilter>());
+            GlobalFilters.Filters.Add(IocManager.Resolve<AbpMvcAuditFilter>());
+            GlobalFilters.Filters.Add(IocManager.Resolve<AbpMvcValidationFilter>());
+            GlobalFilters.Filters.Add(IocManager.Resolve<AbpMvcUowFilter>());
+
             var abpMvcDateTimeBinder = new AbpMvcDateTimeBinder();
             ModelBinders.Binders.Add(typeof(DateTime), abpMvcDateTimeBinder);
             ModelBinders.Binders.Add(typeof(DateTime?), abpMvcDateTimeBinder);

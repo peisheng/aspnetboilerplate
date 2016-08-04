@@ -16,10 +16,17 @@ namespace Abp.Runtime.Validation.Interception
     /// </summary>
     public class MethodInvocationValidator : ITransientDependency
     {
+        public static List<Type> IgnoredTypesForRecursiveValidation { get; }
+
         protected MethodInfo Method { get; private set; }
         protected object[] ParameterValues { get; private set; }
         protected ParameterInfo[] Parameters { get; private set; }
         protected List<ValidationResult> ValidationErrors { get; }
+
+        static MethodInvocationValidator()
+        {
+            IgnoredTypesForRecursiveValidation = new List<Type>();
+        }
 
         /// <summary>
         /// Creates a new <see cref="MethodInvocationValidator"/> instance.
@@ -134,6 +141,14 @@ namespace Abp.Runtime.Validation.Interception
 
         protected virtual void ValidateObjectRecursively(object validatingObject)
         {
+            if (validatingObject == null)
+            {
+                return;
+            }
+
+            SetDataAnnotationAttributeErrors(validatingObject);
+
+            //Validate items of enumerable
             if (validatingObject is IEnumerable && !(validatingObject is IQueryable))
             {
                 foreach (var item in (validatingObject as IEnumerable))
@@ -142,21 +157,38 @@ namespace Abp.Runtime.Validation.Interception
                 }
             }
 
-            if (!(validatingObject is IValidate))
-            {
-                return;
-            }
-
-            SetDataAnnotationAttributeErrors(validatingObject);
-
             if (validatingObject is ICustomValidate)
             {
                 (validatingObject as ICustomValidate).AddValidationErrors(ValidationErrors);
             }
 
+            //Do not recursively validate for enumerable objects
+            if (validatingObject is IEnumerable)
+            {
+                return;
+            }
+
+            var validatingObjectType = validatingObject.GetType();
+
+            //Do not recursively validate for primitive objects
+            if (TypeHelper.IsPrimitiveExtendedIncludingNullable(validatingObjectType))
+            {
+                return;
+            }
+
+            if (IgnoredTypesForRecursiveValidation.Contains(validatingObjectType))
+            {
+                return;
+            }
+
             var properties = TypeDescriptor.GetProperties(validatingObject).Cast<PropertyDescriptor>();
             foreach (var property in properties)
             {
+                if (property.Attributes.OfType<DisableValidationAttribute>().Any())
+                {
+                    continue;
+                }
+
                 ValidateObjectRecursively(property.GetValue(validatingObject));
             }
         }

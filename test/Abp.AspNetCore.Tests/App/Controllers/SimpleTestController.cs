@@ -30,9 +30,28 @@ namespace Abp.AspNetCore.App.Controllers
         }
 
         [DontWrapResult]
+        public JsonResult SimpleJsonExceptionDownWrap()
+        {
+            throw new UserFriendlyException("an exception message");
+        }
+
+        [DontWrapResult]
         public JsonResult SimpleJsonDontWrap()
         {
             return Json(new SimpleViewModel("Forty Two", 42));
+        }
+
+        [HttpGet]
+        [WrapResult]
+        public void GetVoidTest()
+        {
+            
+        }
+
+        [DontWrapResult]
+        public void GetVoidTestDontWrap()
+        {
+
         }
     }
 }

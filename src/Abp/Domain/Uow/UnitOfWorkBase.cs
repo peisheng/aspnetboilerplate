@@ -128,7 +128,7 @@ namespace Abp.Domain.Uow
                 if (_filters[filterIndex].IsEnabled)
                 {
                     disabledFilters.Add(filterName);
-                    _filters[filterIndex] = new DataFilterConfiguration(filterName, false);
+                    _filters[filterIndex] = new DataFilterConfiguration(_filters[filterIndex], false);
                 }
             }
 
@@ -150,7 +150,7 @@ namespace Abp.Domain.Uow
                 if (!_filters[filterIndex].IsEnabled)
                 {
                     enabledFilters.Add(filterName);
-                    _filters[filterIndex] = new DataFilterConfiguration(filterName, true);
+                    _filters[filterIndex] = new DataFilterConfiguration(_filters[filterIndex], true);
                 }
             }
 
@@ -276,9 +276,12 @@ namespace Abp.Domain.Uow
         }
 
         /// <summary>
-        /// Should be implemented by derived classes to start UOW.
+        /// Can be implemented by derived classes to start UOW.
         /// </summary>
-        protected abstract void BeginUow();
+        protected virtual void BeginUow()
+        {
+            
+        }
 
         /// <summary>
         /// Should be implemented by derived classes to complete UOW.
